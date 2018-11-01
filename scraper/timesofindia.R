@@ -2,7 +2,7 @@ library(xml2);
 library(dplyr);
 getMoneyTimesOfIndiaFeeds <- function(url_section,section){
   #url_section can be 1. technology, 2. business, 3. science_and_environment 4. entertainment_and_arts 5. health 6. politics 7. world 8. news
-  stories <- data.frame(matrix(ncol = 6, nrow = 0));
+  stories <- data.frame(matrix(ncol = 6, nrow = 0),stringsAsFactors = FALSE);
   col_names <- c("source","date","section","title", "description","url");
   colnames(stories) <- col_names;
   url <- paste0('https://timesofindia.indiatimes.com/',url_section,'.cms');
@@ -10,7 +10,7 @@ getMoneyTimesOfIndiaFeeds <- function(url_section,section){
   page_source <- read_xml(x = url);
   pub_date <- page_source %>% xml_find_all(xpath = '//item//pubDate') %>% xml_text(trim = TRUE);
   pub_date <- as.Date(strptime(pub_date,format = '%a, %d %b %Y %H:%M:%S'));
-  pub_date <- format(pub_date, format="%m-%d-%Y")
+  pub_date <- format(pub_date, format="%m/%d/%Y");
   stories_uri <- page_source %>% xml_find_all(xpath = '//item//link') %>% xml_text(trim = TRUE);
   stories_title <- page_source %>% xml_find_all(xpath = '//item//title') %>% xml_text(trim = TRUE);
   stories_desc <- page_source %>% xml_find_all(xpath = '//item//description') %>% xml_text(trim = TRUE);
