@@ -8,7 +8,7 @@ getBBCSectionFeeds <- function(url_section,section){
   page_source <- read_xml(x = url);
   pub_date <- page_source %>% xml_find_all(xpath = '//item//pubDate') %>% xml_text(trim = TRUE);
   pub_date <- as.Date(strptime(pub_date,format = '%a, %d %b %Y %H:%M:%S'));
-  pub_date <- format(pub_date, format="%m/%d/%Y")
+  pub_date <- format(pub_date, format="%Y-%m-%d");
   stories_uri <- page_source %>% xml_find_all(xpath = '//item//link') %>% xml_text(trim = TRUE);
   stories_title <- page_source %>% xml_find_all(xpath = '//item//title') %>% xml_text(trim = TRUE);
   stories_desc <- page_source %>% xml_find_all(xpath = '//item//description') %>% xml_text(trim = TRUE);
@@ -26,4 +26,22 @@ getBBCFeeds <- function(){
      bbc_set <- rbind(bbc_set,section_set);
    }
   return(bbc_set);
+}
+
+
+getBBCStories <- function(data) {
+  
+  urls <- data[data$source=='bbc',]$url;
+  detailed_stories <- data.frame(matrix(ncol = 3, nrow = 0),stringsAsFactors = FALSE);
+  rs <- data.frame(matrix(ncol = 3, nrow = 0),stringsAsFactors = FALSE);
+  col_names <- c("source","url","detail");
+  colnames(rs) <- col_names;
+  for(x in 1:length(urls)){
+    print(paste(x,' of ',length(urls)))
+    story <- read_html(x = urls[x]) %>% html_nodes(css = "[property='articleBody'] p,.vxp-media__summary p") %>% html_text() %>% paste(collapse = '');
+    story <- gsub("[\r\n\t]", '', story);
+    rs <- as.data.frame(cbind(source = 'bbc',url = urls[x],detail = story));
+    detailed_stories <- rbind(detailed_stories,rs);
+  }
+  return(detailed_stories);
 }

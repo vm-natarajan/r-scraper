@@ -1,11 +1,9 @@
-library(xml2);
-library(dplyr);
-getMoneyControlSectionFeeds <- function(url_section,section){
+getIndianExpressSectionFeeds <- function(url_section,section){
   #url_section can be 1. technology, 2. business, 3. science_and_environment 4. entertainment_and_arts 5. health 6. politics 7. world 8. news
   stories <- data.frame(matrix(ncol = 6, nrow = 0),stringsAsFactors = FALSE);
   col_names <- c("source","date","section","title", "description","url");
   colnames(stories) <- col_names;
-  url <- paste0('http://www.moneycontrol.com/rss/',url_section,'.xml');
+  url <- paste0('https://indianexpress.com/section/',url_section,'/feed/');
   print(url);
   page_source <- read_xml(x = url);
   pub_date <- page_source %>% xml_find_all(xpath = '//item//pubDate') %>% xml_text(trim = TRUE);
@@ -15,33 +13,33 @@ getMoneyControlSectionFeeds <- function(url_section,section){
   stories_title <- page_source %>% xml_find_all(xpath = '//item//title') %>% xml_text(trim = TRUE);
   stories_desc <- page_source %>% xml_find_all(xpath = '//item//description') %>% xml_text(trim = TRUE);
   stories_desc <- gsub('<img.*/>',replacement = '',stories_desc);
-  stories <- as.data.frame(cbind(date = pub_date,source = 'moneycontrol',section = section,title = stories_title,description = stories_desc,url = stories_uri));
+  stories <- as.data.frame(cbind(date = pub_date,source = 'indian-express',section = section,title = stories_title,description = stories_desc,url = stories_uri));
   return(stories);
 }
 
-getMoneyControlFeeds <- function(){
-  url_sections <- c('business','latestnews','mfcolumns','pfcolumns','economy','marketreports','indianadrs','internationalmarkets','marketedge','marketoutlook','technology','entertainment','sports','worldnews');
-  sections <- c('business','business','opinion','opinion','business','business','business','business','business','business','technology','entertainment','sport','world');
-  mc_set <- data.frame(matrix(ncol = 6, nrow = 0));
+getIndianExpressFeeds <- function(){
+  url_sections <- c('technology','lifestyle','india','world','politics','life-style','opinion','health','europe','cricket','tennis','golf','hockey','sports','entertainment','hollywood','bollywood','asia');
+  sections <- c('technology','life-style','india','world','politics','life-style','opinion','life-style','world','sport','sport','sport','sport','sport','entertainment','entertainment','entertainment','world');
+  ie_set <- data.frame(matrix(ncol = 6, nrow = 0));
   for(x in c(1:length(sections))){
-    section_set <- getMoneyControlSectionFeeds(url_sections[x],sections[x]); 
-    mc_set <- rbind(mc_set,section_set);
+    section_set <- getIndianExpressSectionFeeds(url_sections[x],sections[x]); 
+    ie_set <- rbind(ie_set,section_set);
   }
-  return(mc_set);
+  return(ie_set);
 }
 
-getMoneyControlStories <- function(data) {
+getIndianExpressStories <- function(data) {
   
-  urls <- data[data$source=='moneycontrol',]$url;
+  urls <- data[data$source=='indian-express',]$url;
   detailed_stories <- data.frame(matrix(ncol = 3, nrow = 0),stringsAsFactors = FALSE);
   rs <- data.frame(matrix(ncol = 3, nrow = 0),stringsAsFactors = FALSE);
   col_names <- c("source","url","detail");
   colnames(rs) <- col_names;
   for(x in 1:length(urls)){
     print(paste(x,' of ',length(urls)))
-    story <- read_html(x = urls[x]) %>% html_nodes(css = "[id='article-main'] p") %>% html_text() %>% paste(collapse = '');
-    story <- gsub("[\r\n\t]", '', story)
-    rs <- as.data.frame(cbind(source = 'moneycontrol',url = urls[x],detail = story));
+    story <- read_html(x = urls[x]) %>% html_nodes(css = ".full-details p") %>% html_text() %>% paste(collapse = '');
+    story <- gsub("[\r\n\t]", '', story);
+    rs <- as.data.frame(cbind(source = 'indian-express',url = urls[x],detail = story));
     detailed_stories <- rbind(detailed_stories,rs);
   }
   return(detailed_stories);
