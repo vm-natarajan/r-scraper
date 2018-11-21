@@ -39,9 +39,13 @@ processer <- function(source,destination) {
   word_count <- dt$detail %>% strsplit(" ") %>% lapply(FUN = length) %>% unlist();
   readtime <- floor(word_count/200);
   readtime <- lapply(readtime, function(x) if(x == 0) x <- 1 else x <- x) %>% unlist();
-  for(x in 1:nrow(dt)){
+   for(x in 1:nrow(dt)){
+    fword <- dt[x,] %>% unnest_tokens(word,detail) %>% anti_join(stop_words,by='word') %>% anti_join(parts_of_speech,by='word') %>% anti_join(set,by='word') %>% count(word,sort = TRUE)
+    fword <- fword$word[1];
+    print(fword);
     findq <- paste0('{"url":"',dt$url[x],'"}',sep = '')
-    updateq <- paste0('{"$set":{"readtime": "',readtime[x],'"}}',sep = '')
+    updateq <- paste0('{"$set":{"readtime": "',readtime[x],'"},','"$set":{"fword": "',fword,'"}}',sep = '')
+    print(updateq)
     db$update(findq,updateq)
   }
   
