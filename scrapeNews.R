@@ -6,7 +6,9 @@ scrapeNews <- function(){
     file.sources = list.files(path = c("scraper/","util/"),pattern="*.R",full.names = TRUE);
     sapply(file.sources,source,.GlobalEnv);
     bbc <- getBBCFeeds();
+    print(head(bbc))
     fp <- getFirstPostFeeds();
+    print(head(fp))
     #ht <- getHindustanTimesFeeds();
     #mc <- getMoneyControlFeeds();
     #th <- getTheHinduFeeds();

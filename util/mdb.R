@@ -63,6 +63,6 @@ loadData <- function(collectionName) {
                 options()$mongodb$host,
                 databaseName))
   # Read all the entries
-  data <- db$find()
+  data <- db$find();
   data
 }
